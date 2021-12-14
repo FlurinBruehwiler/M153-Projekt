@@ -91,3 +91,37 @@ app.post('/watchevent', (req, res) => {
     })
 })
 
+app.get('/film/:id/persons', (req, res) => {
+    const id = req.params.id;
+    const sql = `SELECT person.person_Id, person.person_name, person.person_bio from film
+    JOIN PersonType on film.film_Id = PersonType.PersonType_Film_Id
+    join Person on PersonType.PersonType_Person_Id = Person.Person_Id
+    where Film.Film_Id = ${id}`;
+    db.query(sql, (err, results) => {
+            if(err) throw err;
+            console.log(results);
+            res.send(results);
+        }
+    );
+});
+
+app.post('/newPerson', (req, res) => {
+    const bio = req.body.bio === '' ? 'null' : `'${req.body.bio}'`;
+    const sql = `INSERT INTO Person (Person_Id, Person_name, Person_bio) 
+    VALUES (NULL, '${req.body.name}', ${bio})`;
+    db.query(sql, (err, result) => {
+        if(err) throw err;
+        res.status(200).send();
+    })
+})
+
+app.get('/Person/:id', (req, res) => {
+    const id = req.params.id;
+    const sql = `select * from Person where Person_id = ${id}`;
+    db.query(sql, (err, results) => {
+            if(err) throw err;
+            console.log(results);
+            res.send(results);
+        }
+    );
+});
