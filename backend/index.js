@@ -93,9 +93,10 @@ app.post('/watchevent', (req, res) => {
 
 app.get('/film/:id/persons', (req, res) => {
     const id = req.params.id;
-    const sql = `SELECT person.person_Id, person.person_name, person.person_bio from film
-    JOIN PersonType on film.film_Id = PersonType.PersonType_Film_Id
-    join Person on PersonType.PersonType_Person_Id = Person.Person_Id
+    const sql = `SELECT person.person_Id, person.person_name, person.person_bio, persontype.persontype_name from film
+    JOIN FilmPerson on film.film_Id = FilmPerson.filmPerson_Film_Id
+    join Person on filmperson.filmperson_Person_Id = Person.Person_Id
+    Join persontype on filmperson.filmperson_persontype_id = persontype.persontype_id
     where Film.Film_Id = ${id}`;
     db.query(sql, (err, results) => {
             if(err) throw err;
