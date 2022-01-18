@@ -32,6 +32,7 @@ function getPopularFilms(pages){
                     const element = films[j];
                     getFilm(element.id);
                     getPersonsFromFilm(element.id);
+                    
                 }
 
             });
@@ -139,6 +140,7 @@ function getFilm(id){
         resp.on('end', () => {
             data = JSON.parse(data);
             insertFilmIntoDB(data);
+            insertGenresIntoDB(data);
         });
     
     }).on("error", (err) => {
@@ -146,6 +148,33 @@ function getFilm(id){
     });
 }
 
+function insertGenresIntoDB(details){
+    
+    genres = details.genres;
+
+    for (let i = 0; i < genres.length; i++) {
+        const element = genres[i];
+        const createGenreSQL = `insert into genre (genre_id, genre_name) 
+        select '${element.id}', '${element.name}'
+        where not exists (select * from genre where genre_name = '${element.name}')`;
+        
+        db.query(createGenreSQL, (err, result) => {
+            if (err) throw err;
+            insertFilmGenresIntoDB(details.id, element.id);
+        })
+    }
+
+}
+function insertFilmGenresIntoDB(film_id, genre_id){
+
+    const createFilmGenreSQL = `insert into filmgenre (filmgenre_film_id, filmgenre_genre_id) 
+    select '${film_id}', '${genre_id}'
+    where not exists (select * from filmgenre where filmgenre_film_id = '${film_id}' and filmgenre_genre_id = '${genre_id}')`;
+    
+    db.query(createFilmGenreSQL, (err, result) => {
+        if (err) throw err;
+    })
+}
 function insertFilmIntoDB(data){
     const shortDescription = data.tagline === '' ? 'null' : `'${data.tagline.replaceAll("'","''")}'`;
 
@@ -156,3 +185,4 @@ function insertFilmIntoDB(data){
         if (err) throw err;
     })
 }
+
